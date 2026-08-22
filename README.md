@@ -293,7 +293,8 @@ mitigations already applied.
   command.
 
 ## Author
-
-Sebastián Gaibor - sgaibor@espol.edu.ec
-Jennifer Martínez - jenammar@espol.edu.ec
-Luis Velez - luifevel@espol.edu.ec
+```
+- Sebastián Gaibor - sgaibor@espol.edu.ec
+- Jennifer Martínez - jenammar@espol.edu.ec
+- Luis Velez - luifevel@espol.edu.ec
+```
