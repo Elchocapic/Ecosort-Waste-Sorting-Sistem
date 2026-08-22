@@ -1,0 +1,278 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="ecosort_world">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"></plugin>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"></plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"></plugin>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"></plugin>
+    <!-- Necesario para que los sensores de cámara rendericen imagen -->
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Mesa de trabajo: superficie de 0.6(x) x 0.8(y) a 0.4m de altura,
+         centrada en x=0.45 (dentro del alcance del UR5e, ~850mm).
+         Antes era un bloque sólido desde el piso, eso hacía que ciertas
+         configuraciones del codo (cerca de la base) chocaran contra la
+         mesa aunque el punto de agarre en sí fuera alcanzable. Ahora es
+         una tapa delgada sobre 4 patas finas, con espacio libre real
+         debajo para que el brazo se mueva sin restricciones. La altura de
+         la superficie (0.4) no cambió, así que los objetos/bins siguen
+         donde estaban. -->
+    <model name="work_table">
+      <static>true</static>
+      <link name="table_link">
+        <collision name="tapa_collision">
+          <pose>0.45 0 0.385 0 0 0</pose>
+          <geometry><box><size>0.6 0.8 0.03</size></box></geometry>
+        </collision>
+        <visual name="tapa_visual">
+          <pose>0.45 0 0.385 0 0 0</pose>
+          <geometry><box><size>0.6 0.8 0.03</size></box></geometry>
+          <material>
+            <ambient>0.5 0.35 0.2 1</ambient>
+            <diffuse>0.5 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+
+        <collision name="pata_1_collision">
+          <pose>0.20 0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+        </collision>
+        <visual name="pata_1_visual">
+          <pose>0.20 0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+          <material><ambient>0.3 0.2 0.1 1</ambient><diffuse>0.3 0.2 0.1 1</diffuse></material>
+        </visual>
+
+        <collision name="pata_2_collision">
+          <pose>0.20 -0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+        </collision>
+        <visual name="pata_2_visual">
+          <pose>0.20 -0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+          <material><ambient>0.3 0.2 0.1 1</ambient><diffuse>0.3 0.2 0.1 1</diffuse></material>
+        </visual>
+
+        <collision name="pata_3_collision">
+          <pose>0.70 0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+        </collision>
+        <visual name="pata_3_visual">
+          <pose>0.70 0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+          <material><ambient>0.3 0.2 0.1 1</ambient><diffuse>0.3 0.2 0.1 1</diffuse></material>
+        </visual>
+
+        <collision name="pata_4_collision">
+          <pose>0.70 -0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+        </collision>
+        <visual name="pata_4_visual">
+          <pose>0.70 -0.35 0.185 0 0 0</pose>
+          <geometry><cylinder><radius>0.02</radius><length>0.37</length></cylinder></geometry>
+          <material><ambient>0.3 0.2 0.1 1</ambient><diffuse>0.3 0.2 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Cámara cenital fija, mirando hacia abajo sobre la mesa.
+         rpy: pitch=+90deg rota el eje +X (frente de la cámara) hacia -Z. -->
+    <model name="overhead_camera">
+      <static>true</static>
+      <pose>0.45 0 1.1 0 1.5708 0</pose>
+      <link name="camera_link">
+        <visual name="visual">
+          <geometry><box><size>0.05 0.05 0.05</size></box></geometry>
+          <material><ambient>0.1 0.1 0.1 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+        <sensor name="overhead_camera_sensor" type="camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.05</near><far>10</far></clip>
+          </camera>
+          <always_on>true</always_on>
+          <update_rate>15</update_rate>
+          <visualize>true</visualize>
+          <topic>ecosort/camera/image_raw</topic>
+        </sensor>
+      </link>
+    </model>
+
+    <!-- Objeto "papel" (azul) -->
+    <model name="objeto_papel">
+      <pose>0.35 0.15 0.42 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.05</mass><inertia><ixx>0.00002</ixx><iyy>0.00002</iyy><izz>0.00002</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <!-- Fricción alta (igual que las puntas de los dedos del gripper
+               en robotiq_2f_85_macro.urdf.xacro): sin esto, Gazebo usa un
+               valor bajo por defecto y el cubo se resbala de la pinza al
+               levantar el brazo aunque el agarre en sí sea correcto. -->
+          <surface>
+            <friction><ode><mu>100000.0</mu><mu2>100000.0</mu2></ode></friction>
+            <contact><ode><kp>1e+5</kp><kd>1</kd></ode></contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Objeto "plástico" (amarillo) -->
+    <model name="objeto_plastico">
+      <pose>0.45 0 0.42 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.05</mass><inertia><ixx>0.00002</ixx><iyy>0.00002</iyy><izz>0.00002</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <surface>
+            <friction><ode><mu>100000.0</mu><mu2>100000.0</mu2></ode></friction>
+            <contact><ode><kp>1e+5</kp><kd>1</kd></ode></contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>1 1 0 1</ambient><diffuse>1 1 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Objeto "vidrio" (verde) -->
+    <model name="objeto_vidrio">
+      <pose>0.55 -0.15 0.42 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.05</mass><inertia><ixx>0.00002</ixx><iyy>0.00002</iyy><izz>0.00002</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <surface>
+            <friction><ode><mu>100000.0</mu><mu2>100000.0</mu2></ode></friction>
+            <contact><ode><kp>1e+5</kp><kd>1</kd></ode></contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0 1 0 1</ambient><diffuse>0 1 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Contenedores de destino (uno por categoría), al fondo de la mesa,
+         dentro del alcance del UR5e (~0.7m desde la base). Forma de tacho
+         de basura (cuerpo + borde/labio) en vez de una placa plana, para
+         que se lea claramente como "contenedor de reciclaje" y no como un
+         simple marcador. Son SOLO visuales (sin <collision>), igual que
+         antes: el objeto sigue asentándose sobre la mesa real (que sí tiene
+         colisión) a la misma altura de siempre, por eso no hace falta
+         tocar pick_place_node.cpp para nada de esto. -->
+    <model name="bin_papel">
+      <static>true</static>
+      <pose>0.65 0.25 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="cuerpo">
+          <pose>0 0 0.045 0 0 0</pose>
+          <geometry><cylinder><radius>0.08</radius><length>0.09</length></cylinder></geometry>
+          <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse></material>
+        </visual>
+        <visual name="borde">
+          <pose>0 0 0.0975 0 0 0</pose>
+          <geometry><cylinder><radius>0.09</radius><length>0.015</length></cylinder></geometry>
+          <material><ambient>0 0 0.6 1</ambient><diffuse>0 0 0.6 1</diffuse></material>
+        </visual>
+        <!-- "hueco": disco oscuro hundido en la boca, simula mirar hacia
+             un interior vacío (SDF no tiene primitivas huecas/tubo) -->
+        <visual name="hueco">
+          <pose>0 0 0.086 0 0 0</pose>
+          <geometry><cylinder><radius>0.068</radius><length>0.004</length></cylinder></geometry>
+          <material><ambient>0.03 0.03 0.03 1</ambient><diffuse>0.03 0.03 0.03 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="bin_plastico">
+      <static>true</static>
+      <pose>0.65 0 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="cuerpo">
+          <pose>0 0 0.045 0 0 0</pose>
+          <geometry><cylinder><radius>0.08</radius><length>0.09</length></cylinder></geometry>
+          <material><ambient>1 1 0 1</ambient><diffuse>1 1 0 1</diffuse></material>
+        </visual>
+        <visual name="borde">
+          <pose>0 0 0.0975 0 0 0</pose>
+          <geometry><cylinder><radius>0.09</radius><length>0.015</length></cylinder></geometry>
+          <material><ambient>0.6 0.6 0 1</ambient><diffuse>0.6 0.6 0 1</diffuse></material>
+        </visual>
+        <visual name="hueco">
+          <pose>0 0 0.086 0 0 0</pose>
+          <geometry><cylinder><radius>0.068</radius><length>0.004</length></cylinder></geometry>
+          <material><ambient>0.03 0.03 0.03 1</ambient><diffuse>0.03 0.03 0.03 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="bin_vidrio">
+      <static>true</static>
+      <pose>0.65 -0.25 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="cuerpo">
+          <pose>0 0 0.045 0 0 0</pose>
+          <geometry><cylinder><radius>0.08</radius><length>0.09</length></cylinder></geometry>
+          <material><ambient>0 1 0 1</ambient><diffuse>0 1 0 1</diffuse></material>
+        </visual>
+        <visual name="borde">
+          <pose>0 0 0.0975 0 0 0</pose>
+          <geometry><cylinder><radius>0.09</radius><length>0.015</length></cylinder></geometry>
+          <material><ambient>0 0.6 0 1</ambient><diffuse>0 0.6 0 1</diffuse></material>
+        </visual>
+        <visual name="hueco">
+          <pose>0 0 0.086 0 0 0</pose>
+          <geometry><cylinder><radius>0.068</radius><length>0.004</length></cylinder></geometry>
+          <material><ambient>0.03 0.03 0.03 1</ambient><diffuse>0.03 0.03 0.03 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

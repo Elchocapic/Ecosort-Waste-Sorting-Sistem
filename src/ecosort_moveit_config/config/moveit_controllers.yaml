@@ -1,0 +1,39 @@
+# MoveIt solo controla el brazo (grupo ur_manipulator) a través de
+# ur_manipulator_controller, que ya expone la acción FollowJointTrajectory
+# de forma nativa (joint_trajectory_controller/JointTrajectoryController).
+#
+# El gripper_controller (position_controllers/JointGroupPositionController)
+# NO tiene una interfaz de acción compatible con
+# moveit_simple_controller_manager (solo soporta FollowJointTrajectory o
+# GripperCommand), así que el gripper se comanda aparte, publicando
+# directo en /gripper_controller/commands desde el nodo de pick-and-place,
+# sin pasar por MoveIt.
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+
+trajectory_execution:
+  allowed_execution_duration_scaling: 1.2
+  allowed_goal_duration_margin: 0.5
+  # 0.05 en vez de 0.01: visto en pruebas, una ejecución falló con
+  # "Execute request aborted" a los 14ms de aceptada -- demasiado rápido
+  # para ser un choque real, es la verificación de "el estado actual
+  # coincide con el inicio del plan" rechazando por una diferencia mínima
+  # justo después de un movimiento cartesiano anterior. Más margen evita
+  # el rechazo sin perder la validación en sí.
+  allowed_start_tolerance: 0.05
+  execution_duration_monitoring: false
+
+moveit_simple_controller_manager:
+  controller_names:
+    - ur_manipulator_controller
+
+  ur_manipulator_controller:
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: true
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - elbow_joint
+      - wrist_1_joint
+      - wrist_2_joint
+      - wrist_3_joint

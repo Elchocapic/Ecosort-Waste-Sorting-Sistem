@@ -1,0 +1,36 @@
+# Estos límites los usa MoveIt para la parametrización temporal de
+# trayectorias (aceleración), complementando los del URDF.
+# Tomado de ur_moveit_config (mismos nombres de joint, mismo brazo UR5e).
+joint_limits:
+  shoulder_pan_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+    # El URDF permite ±360° (el UR5e físicamente puede girar la base así).
+    # Para todos nuestros objetos/bins, el ángulo natural hacia el objetivo
+    # está entre -15° y +23° -- bien dentro de ±180°. Sin este límite, el
+    # solver de IK a veces elige la rama "por el otro lado" (~223°, brazo
+    # estirado hacia atrás sobre la propia base) para llegar a la misma
+    # posición con el gripper mirando hacia abajo, y esa rama barre
+    # upper_arm_link justo contra el borde cercano de la mesa. Restringir
+    # a ±180° elimina esa rama sin afectar ningún objetivo real.
+    has_position_limits: true
+    min_position: -3.14159265
+    max_position: 3.14159265
+  shoulder_lift_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+  elbow_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+  wrist_1_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+  wrist_2_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+  wrist_3_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+  robotiq_85_left_knuckle_joint:
+    has_acceleration_limits: true
+    max_acceleration: 5.0

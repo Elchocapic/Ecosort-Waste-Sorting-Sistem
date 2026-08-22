@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- El atributo "name" debe coincidir con el <robot name="..."> raíz del
+     URDF (ecosort_sim/urdf/my_robot.urdf.xacro), MoveIt lo valida. -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5e_con_gripper">
+
+  <xacro:include filename="$(find ecosort_moveit_config)/srdf/ecosort_macro.srdf.xacro" />
+  <xacro:ecosort_srdf />
+
+</robot>

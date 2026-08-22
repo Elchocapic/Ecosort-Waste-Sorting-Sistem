@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- Descripción semántica del UR5e + gripper Robotiq 2F-85 de EcoSort.
+       Basada en la SRDF oficial de ur_moveit_config (grupo ur_manipulator y
+       sus disable_collisions, idénticos porque la cadena cinemática del
+       brazo no cambió) más el gripper, añadido a mano: este entorno no tiene
+       GUI para correr moveit_setup_assistant y auto-generar la matriz de
+       colisiones por muestreo, así que los pares del gripper son los
+       adyacentes conocidos por su cinemática (ver comentarios abajo). Si al
+       lanzar move_group ves "Start state in collision" con un par de links
+       del gripper que no esté aquí, avísame y lo añadimos. -->
+  <xacro:macro name="ecosort_srdf" params="">
+
+    <group name="ur_manipulator">
+      <chain base_link="base_link" tip_link="tool0" />
+    </group>
+
+    <!-- Un solo joint: los demás dedos son "mimic" de este y MoveIt los
+         mueve automáticamente, no hace falta listarlos. -->
+    <group name="gripper">
+      <joint name="robotiq_85_left_knuckle_joint" />
+    </group>
+
+    <end_effector name="robotiq_gripper" parent_link="tool0" group="gripper" parent_group="ur_manipulator" />
+
+    <group_state name="home" group="ur_manipulator">
+      <joint name="elbow_joint" value="0" />
+      <joint name="shoulder_lift_joint" value="-1.5707" />
+      <joint name="shoulder_pan_joint" value="0" />
+      <joint name="wrist_1_joint" value="0" />
+      <joint name="wrist_2_joint" value="0" />
+      <joint name="wrist_3_joint" value="0" />
+    </group_state>
+
+    <group_state name="up" group="ur_manipulator">
+      <joint name="elbow_joint" value="0" />
+      <joint name="shoulder_lift_joint" value="-1.5707" />
+      <joint name="shoulder_pan_joint" value="0" />
+      <joint name="wrist_1_joint" value="-1.5707" />
+      <joint name="wrist_2_joint" value="0" />
+      <joint name="wrist_3_joint" value="0" />
+    </group_state>
+
+    <!-- Límites del joint: lower=0.0 (abierto) upper=0.8 (cerrado);
+         gripper_closed_position por defecto en el macro es 0.7929 -->
+    <group_state name="open" group="gripper">
+      <joint name="robotiq_85_left_knuckle_joint" value="0.0" />
+    </group_state>
+    <group_state name="closed" group="gripper">
+      <joint name="robotiq_85_left_knuckle_joint" value="0.7929" />
+    </group_state>
+
+    <!-- Brazo UR: idéntico a ur_moveit_config/srdf/ur_macro.srdf.xacro -->
+    <disable_collisions link1="base_link" link2="base_link_inertia" reason="Adjacent" />
+    <disable_collisions link1="base_link_inertia" link2="shoulder_link" reason="Adjacent" />
+    <disable_collisions link1="tool0" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="tool0" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="tool0" link2="wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="forearm_link" link2="upper_arm_link" reason="Adjacent" />
+    <disable_collisions link1="forearm_link" link2="wrist_1_link" reason="Adjacent" />
+    <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent" />
+    <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />
+    <disable_collisions link1="wrist_1_link" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="wrist_2_link" link2="wrist_3_link" reason="Adjacent" />
+
+    <!-- Gripper Robotiq 2F-85: pares padre-hijo directos (siempre se tocan) -->
+    <disable_collisions link1="wrist_3_link" link2="robotiq_85_base_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_left_knuckle_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_right_knuckle_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_left_inner_knuckle_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_right_inner_knuckle_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_left_knuckle_link" link2="robotiq_85_left_finger_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_right_knuckle_link" link2="robotiq_85_right_finger_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_left_finger_link" link2="robotiq_85_left_finger_tip_link" reason="Adjacent" />
+    <disable_collisions link1="robotiq_85_right_finger_link" link2="robotiq_85_right_finger_tip_link" reason="Adjacent" />
+
+    <!-- Gripper: pares NO adyacentes pero muy próximos por el mecanismo de
+         4 barras (quedan cerca en todo el rango de apertura) -->
+    <disable_collisions link1="robotiq_85_left_inner_knuckle_link" link2="robotiq_85_left_finger_tip_link" reason="Default" />
+    <disable_collisions link1="robotiq_85_right_inner_knuckle_link" link2="robotiq_85_right_finger_tip_link" reason="Default" />
+    <disable_collisions link1="robotiq_85_left_knuckle_link" link2="robotiq_85_left_inner_knuckle_link" reason="Default" />
+    <disable_collisions link1="robotiq_85_right_knuckle_link" link2="robotiq_85_right_inner_knuckle_link" reason="Default" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_left_finger_link" reason="Default" />
+    <disable_collisions link1="robotiq_85_base_link" link2="robotiq_85_right_finger_link" reason="Default" />
+
+  </xacro:macro>
+</robot>
